@@ -1,3 +1,4 @@
+import com.typesafe.config.ConfigFactory
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
@@ -9,6 +10,7 @@ case class CurrencyRequest(id: String, value: Double, from_currency: String, to_
 case class CurrencyResponse(id: String, initial: Double, converted: Double, from_currency: String, to_currency: String)
 
 object BotDetector extends App {
+  val config = ConfigFactory.load("application.conf").getConfig("spark")
 
   val spark = SparkSession.builder
     .master("local[4]")
@@ -46,8 +48,9 @@ object BotDetector extends App {
       .as[CurrencyRequest]
 
   val currency_responses = currency_requests.mapPartitions(requests => {
-    new CurrencyResponseIterator(requests)
+    new CurrencyResponseIterator(requests,config.getString("currency-api"))
   })
+
   currency_responses
     .writeStream
     .format("kafka")

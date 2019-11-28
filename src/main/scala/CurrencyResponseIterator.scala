@@ -2,7 +2,7 @@ import net.liftweb.json.Serialization.write
 import net.liftweb.json.{DefaultFormats, compactRender, parse}
 import scalaj.http.Http
 
-class CurrencyResponseIterator(inner: Iterator[CurrencyRequest]) extends Iterator[String] {
+class CurrencyResponseIterator(inner: Iterator[CurrencyRequest],url: String) extends Iterator[String] {
 
   override def hasNext: Boolean = inner.hasNext
 
@@ -10,7 +10,7 @@ class CurrencyResponseIterator(inner: Iterator[CurrencyRequest]) extends Iterato
     implicit val formats: DefaultFormats.type = DefaultFormats
     val request: CurrencyRequest = inner.next()
     val json: String = write(Array(request))
-    val response = Http("http://localhost:9000/currency")
+    val response = Http(s"$url/currency")
       .postData(json)
       .header("content-type", "application/json")
       .asString
