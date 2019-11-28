@@ -1,20 +1,38 @@
 import net.liftweb.json.Serialization.write
 import net.liftweb.json.{DefaultFormats, compactRender, parse}
 import scalaj.http.Http
+import scala.collection.immutable
 
-class CurrencyResponseIterator(inner: Iterator[CurrencyRequest],url: String) extends Iterator[String] {
+class CurrencyResponseIterator(inner: Iterator[CurrencyRequest], url: String, batchSize: Int) extends Iterator[String] {
 
   override def hasNext: Boolean = inner.hasNext
 
-  override def next(): String = {
+  private var buffer: List[String] = List()
+
+  private def getNewBatch: immutable.List[String] = {
     implicit val formats: DefaultFormats.type = DefaultFormats
-    val request: CurrencyRequest = inner.next()
-    val json: String = write(Array(request))
+    val batch = inner.take(batchSize).toArray
+    val json: String = write(batch)
     val response = Http(s"$url/currency")
       .postData(json)
       .header("content-type", "application/json")
       .asString
     val resp = parse(response.body)
-    compactRender(resp.children.head)
+    resp.children.map(compactRender)
+  }
+
+  override def next(): String = {
+    buffer match {
+      case head :: tail =>
+        buffer = tail
+        head
+      case head :: Nil =>
+        buffer = getNewBatch
+        head
+      case Nil =>
+        val newBatch = getNewBatch
+        buffer = if (newBatch.length == 1) Nil else newBatch.tail
+        newBatch.head
+    }
   }
 }

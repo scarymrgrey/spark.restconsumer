@@ -46,9 +46,10 @@ object BotDetector extends App {
       .selectExpr("value.*")
       .withColumn("id", uuid())
       .as[CurrencyRequest]
-
+  val apiUrl = config.getString("currency-api")
+  val batchSize = config.getInt("batch-size")
   val currency_responses = currency_requests.mapPartitions(requests => {
-    new CurrencyResponseIterator(requests, config.getString("currency-api"))
+    new CurrencyResponseIterator(requests, apiUrl, batchSize)
   })
 
   currency_responses
