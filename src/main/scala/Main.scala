@@ -30,7 +30,7 @@ object BotDetector extends App {
     .add("value", IntegerType)
     .add("from_currency", StringType)
     .add("to_currency", StringType)
-  val checkpointDir = "file:///Users/kpolunin/checkpoint/chkpnt335"
+  val checkpointDir = config.getString("checkpoint-path")
   val df = spark
     .readStream
     .format("kafka")
@@ -48,7 +48,7 @@ object BotDetector extends App {
       .as[CurrencyRequest]
 
   val currency_responses = currency_requests.mapPartitions(requests => {
-    new CurrencyResponseIterator(requests,config.getString("currency-api"))
+    new CurrencyResponseIterator(requests, config.getString("currency-api"))
   })
 
   currency_responses
