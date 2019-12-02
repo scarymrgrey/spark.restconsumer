@@ -23,3 +23,8 @@ libraryDependencies ++= {
 }
 
 libraryDependencies += "com.typesafe" % "config" % "1.4.0"
+
+resolvers += "jitpack" at "https://jitpack.io"
+libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v0.16.0" % "test"
+//libraryDependencies += "org.scalactic" %% "scalactic" % "3.1.0"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % "test"
