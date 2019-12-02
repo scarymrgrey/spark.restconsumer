@@ -1,9 +1,6 @@
 import com.github.mrpowers.spark.fast.tests.DataFrameComparer
-import net.liftweb.json.JsonAST.{JInt, JObject, JString}
-import net.liftweb.json.{DefaultFormats, JValue, parse}
-import org.json4s.JsonAST.JField
+import net.liftweb.json.{DefaultFormats, parse}
 import org.scalatest._
-import scala.collection.JavaConversions._
 
 object TestHttpClient extends HttpClientTrait {
   val httpTrafficStub = Map(
@@ -47,11 +44,24 @@ class CurrencyConverterSpec
     val iterator = new CurrencyResponseIterator(requests, TestHttpClient, 100)
     iterator sameElements TestHttpClient.responsesStub.toIterator
   }
-  
+
   "CurrencyConverter" should "convert and contains all fields" in {
     import spark.implicits._
 
     val sourceDF = TestHttpClient.requestsStub
+      .toDF("value")
+    val actualDF = CurrencyConverter(TestHttpClient).convertCurrency(sourceDF)
+
+    val expectedData = TestHttpClient.responsesStub
+    val expectedDF = spark.sparkContext.parallelize(expectedData).toDS()
+
+    assertSmallDatasetEquality(actualDF, expectedDF)
+  }
+
+  "CurrencyConverter" should "ignore invalid json strings" in {
+    import spark.implicits._
+
+    val sourceDF = (TestHttpClient.requestsStub ++ List("invalid json"))
       .toDF("value")
     val actualDF = CurrencyConverter(TestHttpClient).convertCurrency(sourceDF)
 

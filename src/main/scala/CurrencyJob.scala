@@ -1,6 +1,7 @@
 import com.typesafe.config.ConfigFactory
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions._
 
 object CurrencyJob extends App {
   val config = ConfigFactory.load("application.conf").getConfig("spark")
@@ -25,7 +26,10 @@ object CurrencyJob extends App {
     .option("startingOffsets", "earliest")
     .load()
 
-  new CurrencyConverter(new HttpClientImpl("")).convertCurrency(df)
+  CurrencyConverter(new HttpClientImpl(config.getString("currency-api")))
+    .convertCurrency(df)
+    .select(to_json(struct("id", "from_currency", "initial", "converted", "to_currency"))
+      .alias("value"))
     .writeStream
     .format("kafka")
     .outputMode("append")

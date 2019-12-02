@@ -17,11 +17,15 @@ case class CurrencyConverter(httpClient: HttpClientTrait) {
       .add("to_currency", StringType)
 
     val uuid = udf(() => java.util.UUID.randomUUID().toString)
+
     val currencyRequest = df
-      .select(from_json($"value".cast("string"), schema).as("value"))
+      .select($"value".cast("string"))
+      .where(from_json($"value", schema).isNotNull)
+      .select(from_json($"value", schema).as("value"))
       .selectExpr("value.*")
       .withColumn("id", uuid())
       .as[CurrencyRequest]
+
     val batchSize = config.getInt("batch-size")
     currencyRequest.mapPartitions(requests => new CurrencyResponseIterator(requests, httpClient, batchSize))
   }
