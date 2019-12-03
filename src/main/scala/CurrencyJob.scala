@@ -8,16 +8,16 @@ object CurrencyJob {
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load("application.conf").getConfig("spark")
     implicit val spark: SparkSession =
-    SparkSession.builder
-      //.master("local")
-      .appName("Currency converter")
-      .getOrCreate()
-
+      SparkSession.builder
+        //.master("local")
+        .appName("Currency converter")
+        .getOrCreate()
+    val kafkaURI = config.getString("kafka-cluster")
     val checkpointDir = config.getString("checkpoint-path")
     val df = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", kafkaURI)
       .option("subscribe", "currency_requests")
       .option("startingOffsets", "earliest")
       .load()
@@ -29,7 +29,7 @@ object CurrencyJob {
       .writeStream
       .format("kafka")
       .outputMode("append")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", kafkaURI)
       .option("topic", "currency_responses")
       .option("checkpointLocation", checkpointDir)
       .start()
