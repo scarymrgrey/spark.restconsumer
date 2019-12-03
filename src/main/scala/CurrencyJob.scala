@@ -10,15 +10,8 @@ object CurrencyJob {
     implicit val spark: SparkSession =
     SparkSession.builder
       //.master("local")
-      //.master("spark://localhost:7077")
       .appName("Currency converter")
       .getOrCreate()
-
-    //val rootLogger = Logger.getRootLogger
-    //rootLogger.setLevel(Level.ERROR)
-
-    //Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
-    //Logger.getLogger("org.spark-project").setLevel(Level.ERROR)
 
     val checkpointDir = config.getString("checkpoint-path")
     val df = spark
@@ -34,7 +27,6 @@ object CurrencyJob {
       .select(to_json(struct("id", "from_currency", "initial", "converted", "to_currency"))
         .alias("value"))
       .writeStream
-      //.format("console")
       .format("kafka")
       .outputMode("append")
       .option("kafka.bootstrap.servers", "localhost:9092")
@@ -43,7 +35,7 @@ object CurrencyJob {
       .start()
 
     stream.awaitTermination()
-    //spark.stop()
+    spark.stop()
   }
 }
 
