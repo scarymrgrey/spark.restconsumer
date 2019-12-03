@@ -9,6 +9,7 @@ object CurrencyJob {
     val config = ConfigFactory.load("application.conf").getConfig("spark")
     implicit val spark: SparkSession =
     SparkSession.builder
+      //.master("local")
       //.master("spark://localhost:7077")
       .appName("Currency converter")
       .getOrCreate()
@@ -38,11 +39,11 @@ object CurrencyJob {
       .outputMode("append")
       .option("kafka.bootstrap.servers", "localhost:9092")
       .option("topic", "currency_responses")
-      .option("checkpointLocation", ".")
+      .option("checkpointLocation", "/tmp/spark-rest-checkpoint1")
       .start()
 
     stream.awaitTermination()
-    spark.stop()
+    //spark.stop()
   }
 }
 
