@@ -39,7 +39,7 @@ object CurrencyJob {
       .outputMode("append")
       .option("kafka.bootstrap.servers", "localhost:9092")
       .option("topic", "currency_responses")
-      .option("checkpointLocation", "/tmp/spark-rest-checkpoint1")
+      .option("checkpointLocation", checkpointDir)
       .start()
 
     stream.awaitTermination()
