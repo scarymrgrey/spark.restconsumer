@@ -10,11 +10,11 @@ object CurrencyJob extends App {
     .appName("Currency converter")
     .getOrCreate()
 
-  val rootLogger = Logger.getRootLogger
-  rootLogger.setLevel(Level.ERROR)
+  //val rootLogger = Logger.getRootLogger
+  //rootLogger.setLevel(Level.ERROR)
 
-  Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
-  Logger.getLogger("org.spark-project").setLevel(Level.ERROR)
+  //Logger.getLogger("org.apache.spark").setLevel(Level.ERROR)
+  //Logger.getLogger("org.spark-project").setLevel(Level.ERROR)
 
   val checkpointDir = config.getString("checkpoint-path")
   val df = spark
