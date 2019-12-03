@@ -6,7 +6,7 @@ import org.apache.spark.sql.functions._
 object CurrencyJob extends App {
   val config = ConfigFactory.load("application.conf").getConfig("spark")
   private implicit val spark: SparkSession = SparkSession.builder
-    .master("local")
+    //.master("local")
     .appName("Currency converter")
     .getOrCreate()
 

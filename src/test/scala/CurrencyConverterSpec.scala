@@ -1,6 +1,7 @@
-import com.github.mrpowers.spark.fast.tests.DataFrameComparer
 import net.liftweb.json.{DefaultFormats, parse}
+
 import org.scalatest._
+import org.scalatest.matchers.should.Matchers._
 
 object TestHttpClient extends HttpClientTrait {
   val httpTrafficStub = Map(
@@ -36,13 +37,12 @@ object TestHttpClient extends HttpClientTrait {
 
 class CurrencyConverterSpec
   extends FlatSpec
-    with DataFrameComparer
     with SparkSessionTestWrapper {
 
   "Iterator" should "iterate all collection" in {
     val requests = TestHttpClient.requestsTypedStub.toList.toIterator
     val iterator = new CurrencyResponseIterator(requests, TestHttpClient, 100)
-    iterator sameElements TestHttpClient.responsesStub.toIterator
+    assert(iterator sameElements TestHttpClient.responsesStub.toIterator)
   }
 
   "CurrencyConverter" should "convert and contains all fields" in {
@@ -54,8 +54,7 @@ class CurrencyConverterSpec
 
     val expectedData = TestHttpClient.responsesStub
     val expectedDF = spark.sparkContext.parallelize(expectedData).toDS()
-
-    assertSmallDatasetEquality(actualDF, expectedDF)
+    assert(actualDF.collect() sameElements expectedDF.collect())
   }
 
   "CurrencyConverter" should "ignore invalid json strings" in {
@@ -68,6 +67,6 @@ class CurrencyConverterSpec
     val expectedData = TestHttpClient.responsesStub
     val expectedDF = spark.sparkContext.parallelize(expectedData).toDS()
 
-    assertSmallDatasetEquality(actualDF, expectedDF)
+    assert(actualDF.collect() sameElements expectedDF.collect())
   }
 }
