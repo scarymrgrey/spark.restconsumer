@@ -7,7 +7,7 @@ object CurrencyJob extends App {
   val config = ConfigFactory.load("application.conf").getConfig("spark")
   private implicit val spark: SparkSession = SparkSession.builder
     //.master("spark://localhost:7077")
-    .master("local")
+    //.master("local")
     .appName("Currency converter")
     .config("spark.driver.memory", "2g")
     .getOrCreate()
