@@ -2,7 +2,7 @@ name := "Spark.RestConsumer"
 
 version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12"
 
 assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard

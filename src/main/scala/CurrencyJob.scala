@@ -8,7 +8,6 @@ object CurrencyJob extends App {
   private implicit val spark: SparkSession = SparkSession.builder
     //.master("local")
     .appName("Currency converter")
-    .config("spark.driver.memory", "2g")
     .getOrCreate()
 
   val rootLogger = Logger.getRootLogger
@@ -38,6 +37,5 @@ object CurrencyJob extends App {
     .option("topic", "currency_responses")
     .option("checkpointLocation", checkpointDir)
     .start()
-    .awaitTermination()
 }
 
