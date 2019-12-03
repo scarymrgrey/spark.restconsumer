@@ -6,7 +6,7 @@ import org.apache.spark.sql.functions._
 object CurrencyJob extends App {
   val config = ConfigFactory.load("application.conf").getConfig("spark")
   private implicit val spark: SparkSession = SparkSession.builder
-    //.master("local")
+    .master("local")
     .appName("Currency converter")
     .getOrCreate()
 
@@ -25,7 +25,7 @@ object CurrencyJob extends App {
     .option("startingOffsets", "earliest")
     .load()
 
-  CurrencyConverter(new HttpClientImpl(config.getString("currency-api")))
+  val stream = CurrencyConverter(new HttpClientImpl(config.getString("currency-api")))
     .convertCurrency(df)
     .select(to_json(struct("id", "from_currency", "initial", "converted", "to_currency"))
       .alias("value"))
@@ -37,5 +37,8 @@ object CurrencyJob extends App {
     .option("topic", "currency_responses")
     .option("checkpointLocation", checkpointDir)
     .start()
+
+  stream.awaitTermination()
+  spark.stop()
 }
 
