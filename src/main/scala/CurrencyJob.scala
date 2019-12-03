@@ -6,7 +6,8 @@ import org.apache.spark.sql.functions._
 object CurrencyJob extends App {
   val config = ConfigFactory.load("application.conf").getConfig("spark")
   private implicit val spark: SparkSession = SparkSession.builder
-    //.master("local[*]")
+    //.master("spark://localhost:7077")
+    .master("local")
     .appName("Currency converter")
     .config("spark.driver.memory", "2g")
     .getOrCreate()
@@ -31,6 +32,7 @@ object CurrencyJob extends App {
     .select(to_json(struct("id", "from_currency", "initial", "converted", "to_currency"))
       .alias("value"))
     .writeStream
+    //.format("console")
     .format("kafka")
     .outputMode("append")
     .option("kafka.bootstrap.servers", "localhost:9092")
