@@ -8,7 +8,7 @@ case class CurrencyRequest(id: String, value: Double, from_currency: String, to_
 case class CurrencyResponse(id: String, initial: Double, converted: Double, from_currency: String, to_currency: String)
 
 case class CurrencyConverter(httpClient: HttpClientTrait) {
-  def convertCurrency(df: DataFrame)(implicit spark: SparkSession): Dataset[CurrencyResponse] = {
+  def convertCurrency(df: DataFrame)(implicit spark: SparkSession): Dataset[CurrencyRequest] = {
     val config = ConfigFactory.load("application.conf").getConfig("spark")
     import spark.implicits._
     val schema = new StructType()
@@ -25,8 +25,7 @@ case class CurrencyConverter(httpClient: HttpClientTrait) {
       .selectExpr("value.*")
       .withColumn("id", uuid())
       .as[CurrencyRequest]
+    currencyRequest
 
-    val batchSize = config.getInt("batch-size")
-    currencyRequest.mapPartitions(requests => new CurrencyResponseIterator(requests, httpClient, batchSize))
   }
 }

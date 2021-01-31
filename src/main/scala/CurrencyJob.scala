@@ -1,6 +1,5 @@
 
 import com.typesafe.config.ConfigFactory
-import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 
@@ -9,7 +8,7 @@ object CurrencyJob {
     val config = ConfigFactory.load("application.conf").getConfig("spark")
     implicit val spark: SparkSession =
       SparkSession.builder
-        //.master("local")
+        .master("local")
         .appName("Currency converter")
         .getOrCreate()
     val kafkaURI = config.getString("kafka-cluster")
@@ -24,13 +23,13 @@ object CurrencyJob {
 
     val stream = CurrencyConverter(new HttpClientImpl(config.getString("currency-api")))
       .convertCurrency(df)
-      .select(to_json(struct("id", "from_currency", "initial", "converted", "to_currency"))
+      .select(to_json(struct("id", "value", "from_currency", "to_currency"))
         .alias("value"))
       .writeStream
       .format("kafka")
       .outputMode("append")
       .option("kafka.bootstrap.servers", kafkaURI)
-      .option("topic", "currency_responses")
+      .option("topic", "currency_requests_alpakka")
       .option("checkpointLocation", checkpointDir)
       .start()
 
